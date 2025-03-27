@@ -6,7 +6,9 @@ const UserSchema = new mongoose.Schema({
   email: { type: String, required: true, unique: true },
   password: { type: String, required: true },
   role: { type: String, enum: ["admin", "member", "guest"], default: "member" },
+  isBlocked: { type: Boolean, default: false }
 });
+
 
 // Hacher le mot de passe avant sauvegarde
 UserSchema.pre("save", async function (next) {
