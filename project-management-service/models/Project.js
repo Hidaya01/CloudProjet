@@ -5,7 +5,7 @@ const projectSchema = new mongoose.Schema({
   description: String,
   startDate: Date,
   endDate: Date,
-  status: String,
+  status: { type: String, enum: ['not started', 'in progress', 'completed'] },
   category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
   assignedTo: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }
 });

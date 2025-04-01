@@ -32,8 +32,10 @@ exports.login = async (req, res) => {
     const isMatch = await user.matchPassword(password);
     if (!isMatch) return res.status(401).json({ message: "Mot de passe incorrect" });
 
-    res.json({ token: generateToken(user), user });
+    //  });
   } catch (error) {
+    console.error('Error in Post /login:', error);
+
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
@@ -43,6 +45,8 @@ exports.getUsers = async (req, res) => {
     const users = await User.find();
     res.json(users);
   } catch (error) {
+    console.error('Error in get /users:', error);
+
     res.status(500).json({ message: "Erreur serveur" });
   }
 };
@@ -114,6 +118,7 @@ exports.unblockUser = async (req, res) => {
 // Search Users by Name, Email, or Role**
 exports.searchUsers = async (req, res) => {
   const { query } = req.query;
+  console.log("query",query);
   try {
     const users = await User.find({
       $or: [
@@ -123,7 +128,9 @@ exports.searchUsers = async (req, res) => {
       ]
     });
     res.json(users);
+    console.log("search results:",users);
   } catch (error) {
+    console.error("aaaaaa",error);
     res.status(500).json({ message: "Erreur serveur" });
   }
 };

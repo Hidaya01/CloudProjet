@@ -2,7 +2,10 @@ const express = require('express');
 const router = express.Router();
 const Project = require('../models/Project');
 const moment = require('moment');
+const mongoose= require('mongoose');
+const User = require('../../auth-service/src/models/User');
 
+mongoose.model('User', User.schema, 'auth_users');
 // GET all projects
 router.get('/', async (req, res) => {
     try {
@@ -29,6 +32,30 @@ router.post('/', async (req, res) => {
     } catch (error) {
         console.error('Error in POST /projects:', error);
         res.status(500).json({ error: 'Server Error: Unable to create project' });
+    }
+});
+//filter projects by name or date 
+router.get('/filter', async (req, res) => {
+    console.log('Received query:', req.query); 
+
+    const query = {};
+
+    if (req.query.startdate) {
+        const startDate = moment(req.query.startdate, moment.ISO_8601);
+        console.log('Start date:', startDate.toDate()); 
+        if (!startDate.isValid()) {
+            return res.status(400).json({ error: 'Invalid startdate format' });
+        }
+        query.startDate = { $gte: startDate.toDate() };
+    }
+
+    console.log('Constructed Query:', query); 
+    try {
+        const projects = await Project.find(query).populate('category').populate('assignedTo');
+        res.json(projects);
+    } catch (error) {
+        console.error('Error in GET /projects/filter:', error);
+        res.status(500).json({ error: 'Server Error: Unable to filter projects' });
     }
 });
 
@@ -93,42 +120,5 @@ router.delete('/:id', async (req, res) => {
     }
 });
 
-// GET filter projects
-router.get('/filter', async (req, res) => {
-    try {
-        const query = {};
-
-        if (req.query.name) query.name = { $regex: req.query.name, $options: 'i' };
-
-        if (req.query.startDate) {
-            const startDate = moment(req.query.startDate, moment.ISO_8601);
-            if (!startDate.isValid()) {
-                return res.status(400).json({ error: 'Invalid startDate format' });
-            }
-            query.startDate = { $gte: startDate.toDate() };
-        }
-
-        if (req.query.endDate) {
-            const endDate = moment(req.query.endDate, moment.ISO_8601);
-            if (!endDate.isValid()) {
-                return res.status(400).json({ error: 'Invalid endDate format' });
-            }
-            query.endDate = { $lte: endDate.toDate() };
-        }
-
-        if (req.query.status) query.status = req.query.status;
-
-        const projects = await Project.find(query).populate('category').populate('assignedTo');
-
-        if (projects.length === 0) {
-            return res.status(404).json({ error: 'No projects found matching criteria' });
-        }
-
-        res.json(projects);
-    } catch (error) {
-        console.error('Error in GET /projects/filter:', error);
-        res.status(500).json({ error: 'Server Error: Unable to filter projects' });
-    }
-});
 
 module.exports = router;

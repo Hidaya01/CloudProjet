@@ -4,7 +4,7 @@ const mongoose = require('mongoose');
 const projectRoutes = require('./routes/projects');
 const categoryRoutes = require('./routes/categories');
 
-mongoose.connect('mongodb://localhost/project-management', { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect('mongodb://localhost:27017/CloudProject');
 
 app.use(express.json());
 app.use('/projects', projectRoutes);
